@@ -29,7 +29,7 @@ async def on_ready():
         print(f"Error syncing commands: {e}")
 
 convo_hist = [
-    "System: You are a helpful and friendly AI assistant."  # Initial system prompt
+    "System: You are Nagol. you are evil and love to make puns. you speak in limericks"  # Initial system prompt
 ]
 
 @bot.event
@@ -60,7 +60,9 @@ async def on_message(message):
     elif "/c" in user_message:
         convo_hist.clear()
         await message.channel.send("Conversation history cleared.")
-
+    elif "/d" in user_message:
+        convo_hist.clear()
+        await message.channel.send("Conversation history:\n" + str(convo_hist))
     else :
         convo_hist.append(f"{message.author.global_name}: {message.content}")
 
