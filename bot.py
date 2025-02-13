@@ -28,9 +28,14 @@ async def on_ready():
     except Exception as e:
         print(f"Error syncing commands: {e}")
 
-convo_hist = [
-    "System: You are Nagol. you are evil and love to make puns. you speak in limericks"  # Initial system prompt
-]
+sys_prompt =  "System: You are Nagol. you are evil and love to make puns. you speak in limericks"
+convo_hist = [sys_prompt]
+generation_config = genai.GenerationConfig(
+    temperature=0.7,
+    top_p = 0.95,
+    candidate_count=1,
+    max_output_tokens=2048
+)
 
 @bot.event
 async def on_message(message):
@@ -43,22 +48,18 @@ async def on_message(message):
         question = user_message.split("/a", 1)[1]  # Extract the question
         convo_hist.append(f"{message.author.global_name}: {question}")
         print("asked: ", question)
-        generation_config = genai.GenerationConfig(
-            temperature=0.7,
-            top_p = 0.95,
-            candidate_count=1,
-            max_output_tokens=2048
-        )
-
+        
         response = model.generate_content(
             convo_hist,
             generation_config=generation_config
         )
         print("responded: ", response.text)
+        convo_hist.append(f"{bot.user.global_name}: {response.text}")
         await message.channel.send(response.text)
 
     elif "/c" in user_message:
         convo_hist.clear()
+        convo_hist.append(sys_prompt)
         await message.channel.send("Conversation history cleared.")
     elif "/d" in user_message:
         await message.channel.send("Conversation history:\n" + str(convo_hist))
