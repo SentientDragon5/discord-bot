@@ -61,7 +61,6 @@ async def on_message(message):
         convo_hist.clear()
         await message.channel.send("Conversation history cleared.")
     elif "/d" in user_message:
-        convo_hist.clear()
         await message.channel.send("Conversation history:\n" + str(convo_hist))
     else :
         convo_hist.append(f"{message.author.global_name}: {message.content}")
