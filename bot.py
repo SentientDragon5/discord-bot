@@ -28,7 +28,7 @@ async def on_ready():
     except Exception as e:
         print(f"Error syncing commands: {e}")
 
-sys_prompt =  "System: You are Nagol. you are evil and love to make puns. you speak in limericks"
+sys_prompt =  "System: You are Nagol. you are evil. you speak in limericks"
 convo_hist = [sys_prompt]
 generation_config = genai.GenerationConfig(
     temperature=0.7,
@@ -37,17 +37,34 @@ generation_config = genai.GenerationConfig(
     max_output_tokens=2048
 )
 
+# bot.user.global_name
+# didnt work bc it is not defined until on ready
+respond_prompt = f"I am {"Nagol"}. I prefer to only talk when asked questions. Based off the following conversation, should I speak up and respond? return only the text \"yes\" or \"no\" and nothing else."
+respond_config = genai.GenerationConfig(
+    temperature=0.01,
+    top_p = 0.95,
+    candidate_count=1,
+    max_output_tokens=8
+)
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:  # Check if the message is from the bot itself
         return
-
+    
     user_message = message.content # Convert to lowercase for easier checking
+    convo_hist.append(f"{message.author.global_name}: {user_message}")
 
-    if "/a" in user_message:
-        question = user_message.split("/a", 1)[1]  # Extract the question
-        convo_hist.append(f"{message.author.global_name}: {question}")
-        print("asked: ", question)
+    print(respond_prompt + " "+ str(convo_hist))
+    wants_talk = model.generate_content(
+        respond_prompt + " "+ str(convo_hist),
+        generation_config=respond_config
+    )
+    print(wants_talk.text)
+
+    if ("/a" in user_message) or ("yes" in wants_talk.text):
+        # convo_hist.append(f"{message.author.global_name}: {question}")
+        print("asked: ", user_message)
         
         response = model.generate_content(
             convo_hist,
@@ -63,7 +80,7 @@ async def on_message(message):
         await message.channel.send("Conversation history cleared.")
     elif "/d" in user_message:
         await message.channel.send("Conversation history:\n" + str(convo_hist))
-    else :
-        convo_hist.append(f"{message.author.global_name}: {message.content}")
+    # else :
+    #     convo_hist.append(f"{message.author.global_name}: {message.content}")
 
 bot.run(TOKEN)
