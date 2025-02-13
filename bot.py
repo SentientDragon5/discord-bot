@@ -8,42 +8,38 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+import google.generativeai as genai
+
+
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel('gemini-1.5-flash')
+
 # Specify intents
 intents = discord.Intents.default()
-intents.members = True  # Enable the members intent if you need it for on_member_join
-intents.message_content = True  # **Enable Message Content Intent**
-# If you need message content, you might need to enable message_content intent as well
-# intents.message_content = True # This is a privileged intent, see explanation below
+intents.members = True
+intents.message_content = True
 
-client = discord.Client(intents=intents) # Pass intents to client initialization
+client = discord.Client(intents=intents) 
 
 @client.event
 async def on_ready():
     print(f'{client.user.name} has connected to Discord!')
 
 @client.event
-async def on_member_join(member):
-    await member.create_dm()
-    await member.dm_channel.send(
-        f'Hi {member.name}, welcome to my Discord server!'
-    )
-
-@client.event
 async def on_message(message):
     if message.author == client.user:
         return
+    convo_hist.append(f"{message.author.global_name} : {message.content}")
+    if "/a" in message.content:
+        print("asked : ", message.content)
 
-    brooklyn_99_quotes = [
-        'I\'m the human form of the 💯 emoji.',
-        'Bingpot!',
-        (
-            'Cool. Cool cool cool cool cool cool cool, '
-            'no doubt no doubt no doubt no doubt.'
-        ),
-    ]
-    print("sup : ", message.content)
-    if message.content == '99!':
-        response = random.choice(brooklyn_99_quotes)
-        await message.channel.send(response)
+        response = model.generate_content(convo_hist)
+        print("responded: ", response.text)
+        await message.channel.send(response.text)
+
+convo_hist = []
+# def add_message_to_convo(message):
+#     convo_hist.append(message.author.)
 
 client.run(TOKEN)
