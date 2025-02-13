@@ -1,8 +1,6 @@
-# bot.py
 import os
-import random
-
 import discord
+from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,36 +8,49 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 import google.generativeai as genai
 
-
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# Specify intents
 intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 
-client = discord.Client(intents=intents) 
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f'{client.user.name} has connected to Discord!')
+    print(f'{bot.user.name} has connected to Discord!')
+    # No need to sync slash commands if you're not using them
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} slash command(s)")
+    except Exception as e:
+        print(f"Error syncing commands: {e}")
 
-@client.event
+convo_hist = []
+
+@bot.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == bot.user:  # Check if the message is from the bot itself
         return
-    convo_hist.append(f"{message.author.global_name} : {message.content}")
-    if "/a" in message.content:
-        print("asked : ", message.content)
+
+    user_message = message.content # Convert to lowercase for easier checking
+
+    if "/a" in user_message:
+        question = user_message.split("/a", 1)[1]  # Extract the question
+        convo_hist.append(f"{message.author.global_name}: {question}")
+        print("asked: ", question)
 
         response = model.generate_content(convo_hist)
         print("responded: ", response.text)
         await message.channel.send(response.text)
 
-convo_hist = []
-# def add_message_to_convo(message):
-#     convo_hist.append(message.author.)
+    elif "/c" in user_message:
+        convo_hist.clear()
+        await message.channel.send("Conversation history cleared.")
 
-client.run(TOKEN)
+    else :
+        convo_hist.append(f"{message.author.global_name}: {message.content}")
+
+bot.run(TOKEN)
