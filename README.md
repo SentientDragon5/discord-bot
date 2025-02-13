@@ -2,7 +2,6 @@
 
 ## Setup
 
-install npm
+using python 3.12
 
-npm install
-[ngrok](https://ngrok.com/downloads/mac-os)
+[follow tut](https://realpython.com/how-to-make-a-discord-bot-python/#interacting-with-discord-apis)
