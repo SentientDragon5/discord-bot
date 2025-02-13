@@ -28,7 +28,9 @@ async def on_ready():
     except Exception as e:
         print(f"Error syncing commands: {e}")
 
-convo_hist = []
+convo_hist = [
+    "System: You are a helpful and friendly AI assistant."  # Initial system prompt
+]
 
 @bot.event
 async def on_message(message):
@@ -41,8 +43,17 @@ async def on_message(message):
         question = user_message.split("/a", 1)[1]  # Extract the question
         convo_hist.append(f"{message.author.global_name}: {question}")
         print("asked: ", question)
+        generation_config = genai.GenerationConfig(
+            temperature=0.7,
+            top_p = 0.95,
+            candidate_count=1,
+            max_output_tokens=2048
+        )
 
-        response = model.generate_content(convo_hist)
+        response = model.generate_content(
+            convo_hist,
+            generation_config=generation_config
+        )
         print("responded: ", response.text)
         await message.channel.send(response.text)
 
