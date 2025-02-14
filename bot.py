@@ -39,7 +39,7 @@ generation_config = genai.GenerationConfig(
 
 # bot.user.global_name
 # didnt work bc it is not defined until on ready
-respond_prompt = f"I am {"Nagol"}. I prefer to only talk when asked questions. Based off the following conversation, should I speak up and respond? return only the text \"yes\" or \"no\" and nothing else."
+respond_prompt = "I am Nagol. I prefer to only talk when asked questions. Based off the following conversation, should I speak up and respond? return only the text \"yes\" or \"no\" and nothing else."
 respond_config = genai.GenerationConfig(
     temperature=0.01,
     top_p = 0.95,
